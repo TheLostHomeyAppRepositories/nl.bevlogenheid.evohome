@@ -103,6 +103,7 @@ Yes ;-)
 
 ### Changelog
 
+- V2.2.0 2019-04-02 : Added Evohome quickaction global token to be used in logic
 - V2.1.9 2019-02-23 : Display login failures at start-up in timeline
 - V2.1.7 2019-02-21 : Bugfix permanent quickaction (spotted by WillyBits)
 - V2.1.6 2019-02-17 : New action card: QuickAction with temporary override

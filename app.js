@@ -15,6 +15,20 @@ class Evohome extends Homey.App {
     Homey.ManagerSettings.set('zones_read','None');
     Homey.ManagerSettings.set('access_token_expires',Date()); // make sure new is used at start-up
 
+
+// register qa-status-token
+let QA_Token = new Homey.FlowToken( 'evohome_qa_status', {
+  type: 'string',
+  title: 'Evohome quickaction'
+});
+QA_Token.register()
+  .then(() => {
+    return QA_Token.setValue( 'not available' );
+  })
+  .catch( err => {
+    this.error( err );
+  });
+
 // set_quickaction
 
 let set_quickaction = new Homey.FlowCardAction('set_quickaction');
@@ -24,6 +38,7 @@ set_quickaction
         this.log(args['qa'])
         let qa_set = evohomey.quickaction_set(args['qa'],'True',''); // true or false
         Homey.ManagerSettings.set('quickAction',args['qa']);
+        QA_Token.setValue( args['qa'] );
         return Promise.resolve( qa_set );
 
     })
@@ -47,6 +62,7 @@ set_temporary_quickaction
             //this.log(TimezoneDate);
             let qa_temp_set = evohomey.quickaction_set(args['qa'],'False',tmpTime.toISOString().replace(/\.\d+Z/,'Z')); // true or false
             Homey.ManagerSettings.set('quickAction',args['qa']);
+            QA_Token.setValue( args['qa'] );
             //return Promise.resolve( qa_temp_set );
             return Promise.resolve (' TMP ok');
         })
@@ -191,6 +207,7 @@ reset_temperature
       console.log('QA retrieved: ', qa_new);
       var qa_old = Homey.ManagerSettings.get('qa')
       console.log('QA Stored: ',qa_old);
+      QA_Token.setValue( qa_new );
       if (qa_old != qa_new) {
         // Trigger quickaction_changed_externally
         console.log ('quickaction changed')
