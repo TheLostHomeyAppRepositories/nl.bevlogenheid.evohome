@@ -196,8 +196,9 @@ class ThermostatDevice extends Homey.Device {
       if ( zone_data != 'None' ) {
       //console.log (zone_data);
       zone_data.forEach(function(value){
+        //console.log(value.zoneId)
         if ( value.zoneId == id) {
-            //device.log('-- device interval checking for changes --', value.name, value.zoneId, value.temperatureStatus.temperature, value.heatSetpointStatus.targetTemperature );
+            //device.log('-- device interval checking for changes --', value.name, value.zoneId, value.temperatureStatus.temperature, value.setpointStatus.targetTemperature );
             // process zone information
             var measure_old = device.getCapabilityValue('measure_temperature')
             if ( measure_old != value.temperatureStatus.temperature) {
@@ -276,12 +277,12 @@ function token_handling()
           var access_token = data.data.access_token
           //console.log('Response access token:', data.data.access_token)
           //console.log('Expires:', data.data.expires_in)
-          console.log(data.data);
+          //console.log(data.data);
           var timeObject = new Date();
           var timeObject = new Date(timeObject.getTime() + data.data.expires_in*1000);
           Homey.ManagerSettings.set('access_token', data.data.access_token);
-          console.log (data.data.access_token);
-          console.log (timeObject);
+          //console.log (data.data.access_token);
+          //console.log (timeObject);
           Homey.ManagerSettings.set('access_token_expires', timeObject);
           //self.access_token = None
           //self.access_token_expires = None
@@ -338,14 +339,22 @@ function account_handling()
               }
               http.get(options).then(function (result) {
                   var data = JSON.parse(result.data)
-                  console.log('--- system id check ---- ' )
-                  console.log(data)
+                  console.log('--- device.js system id check ---- ' )
+                  //console.log(data)
                   var systemId = data[0].gateways[0].temperatureControlSystems[0].systemId;
-                  var locationId = data[0].locationInfo.locationId;
-                  console.log(result.data);
-                  //var locationId =
+                  //var locationId = data[0].locationInfo.locationId;
+                  console.log('device.js')
+                  console.log(data.length) // hoeveel locaties zijn er
+                  var locationId = []
+                  data.forEach(function(value){
+                    locationId.push(value.locationInfo.locationId)
+                  })
+                  console.log(locationId)
                   Homey.ManagerSettings.set('systemId',systemId);
+                  console.log('zo gaan we locationid oplsaan')
+                  console.log(locationId);
                   Homey.ManagerSettings.set('locationId',locationId);
+                  console.log ('loationid opgeslagen insettings');
                   resolve('ok')
               })
               .catch(function(reject) {

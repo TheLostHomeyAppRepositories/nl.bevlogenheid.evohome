@@ -148,34 +148,41 @@ zones_read: function() {
       var locationId= Homey.ManagerSettings.get('locationId');
       console.log(locationId)
       var zones_read= []
-      var promises = locationId.map(async (value) => {
-        //console.log(zones_read.length);
-        var result = await zones_read_location(value,zones_read)
-        console.log('promise zone read result')
-        //console.log(result.length);
-        //console.log(global_zones_read)
-        Homey.ManagerSettings.set('zones_read',global_zones_read)
-        console.log('promise zone read result end')
-        return new Promise((res, rej) => {res(result)})
-      })
-
-      Promise.all(promises)
-      .then((results) => {
-        // do what you want on the results
-        //console.log(results.length)
-        //Homey.ManagerSettings.set('zones_read',global_zones_read)
-
-})
-
-
       locationId.forEach(function(value) {
+        var locationurl = ('/WebAPI/emea/api/v1/location/' + value + '/status?includeTemperatureControlSystems=True');
+        var options = {
+          protocol: 'https:',
+          hostname: 'tccna.honeywell.com',
+          path: locationurl,
+          headers: {
+            'Authorization': 'bearer ' + access_token,
+            'Accept': 'application/json, application/xml, text/json, text/x-json, text/javascript, text/xml'
+          }
+        }
+        console.log(locationurl)
+        http.get(options).then(function (result) {
+          var data = JSON.parse(result.data)
+  //      console.log(result.data.gateways[0].temperatureControlSystems[0].zones)
+        console.log(data);
+        console.log('---');
+        //console.log(data.gateways[0].temperatureControlSystems[0].zones);
+        // !! dit nog aanpassen, moet eerst een push worden en net na de foreach dan een set
+          zones_read.push(data.gateways[0].temperatureControlSystems[0].zones)
+          console.log('--- zones_read for each locationId ---')
+          console.log(zones_read)
+          console.log(zones_read.length)
+          //Homey.ManagerSettings.set('zones_read',zones_read);
 
+        })
+      .catch(function(reject) {
+        console.log(reject);
+      })
     }) // locationid forEach END
-    //console.log('--- zones_read done ---')
+    console.log('--- zones_read done ---')
     //console.log(zones_read.length)
     //console.log(zones_read)
-    //Homey.ManagerSettings.set('zones_read',zones_read);
-    //resolve(zones_read)
+    Homey.ManagerSettings.set('zones_read',zones_read);
+    resolve(zones_read)
 
   }) // evohomelogin
   .catch(function(reject) {
@@ -200,7 +207,7 @@ function token_handling()
       console.log('reject token handling' ) ; reject ('username settings missing'); return
     }
     else {
-      //console.log('token handling');
+      console.log('token handling');
       var currentTime = new Date();
       var expireTime = Date.parse(access_token_expires);
       var difference = expireTime - currentTime;
@@ -351,41 +358,4 @@ function evohomelogin(user, password, appid, callback) {
     })
 
   });
-}
-
-var zones_read_location = (value,zones_read) => {
-  return new Promise((resolve,reject) => {
-    console.log('zones_read_location: ' + value);
-    var access_token = Homey.ManagerSettings.get('access_token');
-    var locationurl = ('/WebAPI/emea/api/v1/location/' + value + '/status?includeTemperatureControlSystems=True');
-    var options = {
-      protocol: 'https:',
-      hostname: 'tccna.honeywell.com',
-      path: locationurl,
-      headers: {
-        'Authorization': 'bearer ' + access_token,
-        'Accept': 'application/json, application/xml, text/json, text/x-json, text/javascript, text/xml'
-      }
-    }
-    console.log(locationurl)
-    http.get(options).then(function (result) {
-      var data = JSON.parse(result.data)
-    console.log(data.gateways[0].temperatureControlSystems[0].zones)
-    data.gateways[0].temperatureControlSystems[0].zones.forEach(function(value){
-      global_zones_read.push(value)
-      console.log(global_zones_read.length)
-    })
-//      zones_read.push(data.gateways[0].temperatureControlSystems[0].zones)
-      //console.log('--- zones_read for each locationId ---')
-      //console.log(zones_read)
-      //console.log(zones_read.length)
-      //Homey.ManagerSettings.set('zones_read',zones_read);
-      resolve(zones_read)
-    })
-  .catch(function(reject) {
-    console.log(reject);
-  })
-    //console.log(value)
-  //  resolve(zones_read)
-  })
 }

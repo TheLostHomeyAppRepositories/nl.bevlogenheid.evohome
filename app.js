@@ -4,6 +4,9 @@ var jsonPath = require('jsonpath-plus')
 var http = require('http.min')
 var evohomey = require('./lib/evohomey.js')
 var login = require('./lib/login.js')
+global.global_zones_read = []
+global.global_list_devices = []
+
 //var moment = require('./lib/moments.js');
 
 class Evohome extends Homey.App {
@@ -184,6 +187,7 @@ reset_temperature
    var evohomeloginPromise = login.evohomelogin(evohomeUser,evohomePassword,appid);
    evohomeloginPromise.then(function(result) {
      console.log ('app start login check: login successfull')
+     regular_update(); // kick-off during start-up
     })
     .catch(function(reject) {
       console.log('app start: login failed: ', reject);
@@ -195,33 +199,32 @@ reset_temperature
 
 
  // uncomment after checks complete
- regular_update(); // kick-off during start-up
- setInterval(regular_update,5 * 60 * 1000);
+ //setInterval(regular_update,2 * 60 * 1000);
  function regular_update() {
-    console.log('5 minute update routine')
+    console.log('5 minute update routine -- weer opnieuw aanzetten als alles werkt')
     // 1 - quickaction status uitlezen
-    console.log('quickaction read')
-    var quickactionPromise  = evohomey.quickaction_read();
-    quickactionPromise.then(function(result) {
-      var qa_new = result;
-      console.log('QA retrieved: ', qa_new);
-      var qa_old = Homey.ManagerSettings.get('qa')
-      console.log('QA Stored: ',qa_old);
-      QA_Token.setValue( qa_new );
-      if (qa_old != qa_new) {
-        // Trigger quickaction_changed_externally
-        console.log ('quickaction changed')
-        Homey.ManagerSettings.set('qa',qa_new);
-        let quickaction_changed_externally = new Homey.FlowCardTrigger('quickaction_changed_externally');
-        let tokens = {
-          'qa_name': qa_new
-        }
-        quickaction_changed_externally
-        .register()
-        .trigger(tokens)
-          .catch('qa changed externally catch')
-          .then(console.log('new qa set'))
-      }
+//    console.log('quickaction read')
+//    var quickactionPromise  = evohomey.quickaction_read();
+//    quickactionPromise.then(function(result) {
+//      var qa_new = result;
+//      console.log('QA retrieved: ', qa_new);
+//      var qa_old = Homey.ManagerSettings.get('qa')
+//      console.log('QA Stored: ',qa_old);
+//      QA_Token.setValue( qa_new );
+//      if (qa_old != qa_new) {
+//        // Trigger quickaction_changed_externally
+//        console.log ('quickaction changed')
+//        Homey.ManagerSettings.set('qa',qa_new);
+//        let quickaction_changed_externally = new Homey.FlowCardTrigger('quickaction_changed_externally');
+//        let tokens = {
+//          'qa_name': qa_new
+//        }
+//        quickaction_changed_externally
+//        .register()
+//        .trigger(tokens)
+//          .catch('qa changed externally catch')
+//          .then(console.log('new qa set'))
+//     }
       // 2 - zone status uitlezen
       console.log('zone status read')
       var zonePromise = evohomey.zones_read();
@@ -231,7 +234,7 @@ reset_temperature
         //Homey.ManagerSettings.set('zones_read','test');
         // hier dingen uitvoeren
       })
-    });
+//    });
 
 } // 5 minute update
 
