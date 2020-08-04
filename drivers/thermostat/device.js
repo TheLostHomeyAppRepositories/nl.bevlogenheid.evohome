@@ -92,7 +92,7 @@ class ThermostatDevice extends Homey.Device {
 
         //  test
 
-        // Action: target_temperature
+        // Action: target_temperature_manual
         this.registerCapabilityListener('target_temperature_manual', async (value) => {
             this.log('target temperature set requested')
             var target_old = this.getCapabilityValue('target_temperature')
@@ -201,8 +201,23 @@ class ThermostatDevice extends Homey.Device {
             //device.log('-- device interval checking for changes --', value.name, value.zoneId, value.temperatureStatus.temperature, value.setpointStatus.targetTemperature );
             // process zone information
             var measure_old = device.getCapabilityValue('measure_temperature')
+            // TEST
+            //console.log('battery_alrm test  ')
+            //device.setCapabilityValue('alarm_battery', true)
+            //  .catch(device.error);
+            // TEST END
+            //console.log('active faults: ' + value.name + ' ' + value.activeFaults);
+            if ( value.activeFaults === "" ) {
+              device.setCapabilityValue('alarm_battery', false)
+            }
+            if (typeof value.activeFaults[0] !== 'undefined') {
+              if (value.activeFaults[0].faultType === 'TempZoneActuatorLowBattery') {
+                device.setCapabilityValue('alarm_battery', true)
+              }
+            }
+
             if ( measure_old != value.temperatureStatus.temperature) {
-              console.log('trigger temperature changecard', measure_old, value.temperatureStatus.temperature)
+              console.log('trigger temperature changecard', value.name, measure_old, value.temperatureStatus.temperature)
               device.setCapabilityValue('measure_temperature',value.temperatureStatus.temperature)
               let anytempchange = new Homey.FlowCardTrigger('any_measure_temp_changed');
               let tokens = {
@@ -213,7 +228,7 @@ class ThermostatDevice extends Homey.Device {
               .register()
               .trigger( tokens )
               .catch( device.error )
-              .then( device.log )
+              .then( device.log("any temp change triggered") )
                 }
             var target_old = device.getCapabilityValue('target_temperature')
             device.setCapabilityValue('target_temperature',value.setpointStatus.targetHeatTemperature)

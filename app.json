@@ -3,7 +3,7 @@
     "name": {
         "en": "Honeywell Evohome"
     },
-    "version": "3.0.1",
+    "version": "3.0.3",
     "compatibility": ">=3",
     "sdk": 2,
     "description" : {

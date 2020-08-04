@@ -199,9 +199,11 @@ reset_temperature
 
 
  // uncomment after checks complete
- //setInterval(regular_update,2 * 60 * 1000);
+ setInterval(regular_update,5 * 60 * 1000);
+ //
+
  function regular_update() {
-    console.log('5 minute update routine -- weer opnieuw aanzetten als alles werkt')
+    console.log('5 minute update routine')
     // 1 - quickaction status uitlezen
 //    console.log('quickaction read')
 //    var quickactionPromise  = evohomey.quickaction_read();

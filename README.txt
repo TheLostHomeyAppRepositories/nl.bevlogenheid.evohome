@@ -65,7 +65,7 @@ Additional information by various sources on Internet
 
 ### Donate
 
-If you like the app, consider a donation to support development  
+If you like the app, consider a donation to support development
 [![Paypal donate][pp-donate-image]][pp-donate-link]
 
 ### Limitations
@@ -99,7 +99,8 @@ Yes ;-)
 
 ### Changelog
 
-- V3.0.0 2020-02-10 : Rewrite to include multiple locations
+- V3.0.2 2020-02-11 : Added low battery detection for Thermostats
+- V3.0.0 2020-02-10 : Rewrite to include multiple locations for Thermostats
 - V2.2.0 2019-04-02 : Added Evohome quickaction global token to be used in logic
 - V2.1.9 2019-02-23 : Display login failures at start-up in timeline
 - V2.1.7 2019-02-21 : Bugfix permanent quickaction (spotted by WillyBits)
