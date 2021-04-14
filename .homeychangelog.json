@@ -1,0 +1,23 @@
+{
+  "3.0.0": {
+    "en": "Rewrite to support multiple locations"
+  },
+  "3.0.1": {
+    "en": "re-enabled 5 minute update interval"
+  },
+  "3.0.2": {
+    "en": "Thermostat low battery warning included"
+  },
+  "3.0.3": {
+    "en": "Bugfix low battery indicator"
+  },
+  "3.0.4": {
+    "en": "Fixed QuickAction status"
+  },
+  "3.0.5": {
+    "en": "Fixed low battery detection"
+  },
+  "3.0.6": {
+    "en": "Fixed readme, fixed errors on 'undefined' temperature readings"
+  }
+}
