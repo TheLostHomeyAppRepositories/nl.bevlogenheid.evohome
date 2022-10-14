@@ -72,35 +72,55 @@ class ThermostatDriver extends Homey.Driver {
         console.log(Homey.ManagerSettings.get('locationId'));
         console.log('--- Settings locationId ---')
         var locationId= Homey.ManagerSettings.get('locationId');
+        // hierdoor wordt het geen array meer als het maar 1 positie is)
+        // de vraag is, wordt het wel een array als er meerdere locaties zijn?
         console.log('driver.js onpair locationid')
         console.log(locationId)
+        console.log(Array.isArray(locationId))
+        var locationPromise = new Promise(( resolve, reject ) => {
+          locationId.forEach((value) => {
+          var locationurl = ('/WebAPI/emea/api/v1/location/' + value + '/status?includeTemperatureControlSystems=True');
+          var options = {
+            protocol: 'https:',
+            hostname: 'tccna.honeywell.com',
+            path: locationurl,
+            headers: {
+              'Authorization': 'bearer ' + access_token,
+              'Accept': 'application/json, application/xml, text/json, text/x-json, text/javascript, text/xml'
+            }
+          }
+          console.log(locationurl)
+          http.get(options).then(function (result) {
+            var data = JSON.parse(result.data)
+            console.log('--- PAIRING ---');
+            //console.log(data.gateways[0].temperatureControlSystems[0].zones);
+            var zones = data.gateways[0].temperatureControlSystems[0].zones;
+            zones.forEach((device) => {
+              var foundDevice = {
+                //name: device.name + ' ' + value,
+                name: device.name,
+                data: {
+                  id: device.zoneId,
+                  location: value
+                }
+              }
+              console.log(foundDevice);
+              devices.push(foundDevice);
+              resolve()
 
-        var promises = locationId.map(async (value) => {
-          //console.log(zones_read.length);
-          var result = await list_devices_locations(value)
-          //console.log('pair devices result')
-          //console.log(result)
-          //console.log('global list')
-          //console.log(global_list_devices);
-          return new Promise((res, rej) => {res(result)})
-        })
+          })
+          //callback( null, devices );
+      }) // END foreach locationid
+    })
+  }) // promise location
+     locationPromise.then(() =>  {
+      console.log( ' LocationPromise complete')
 
-        Promise.all(promises)
-        .then((results) => {
-          console.log('done with pairing')
-          devices = global_list_devices;
-          console.log('promise list device all')
-          console.log(global_list_devices);
-          console.log('end promise list device all')
-          resolve(global_list_devices);
-          // do what you want on the results
-          //console.log(results.length)
-          //Homey.ManagerSettings.set('zones_read',global_zones_read)
-        })
-
+        resolve(devices);
 
 
       //callback( null, devices );
+     }) //locationPromise
     }) //evohomelogin
 //    socket.on('list_devices', function( data, callback ) {
       // emit when devices are still being searched
@@ -186,7 +206,7 @@ function token_handling()
         })
         .catch(function(reject) {
           console.log(reject);
-          //reject('token retrieval failed')
+          reject('token retrieval failed')
         })
       } // end else
     }
@@ -275,51 +295,13 @@ function evohomelogin(user, password, appid, callback) {
           })
           .catch(function(error) {
             console.log('catch account_handlingPromise', error)
-            //reject (error)
+            reject (error)
           })
     })
     .catch(function(error) {
       console.log('catch token_handlingPromise', error)
-      //reject (error)
+      reject (error)
     })
 
   });
-}
-
-var list_devices_locations = (value) => {
-  return new Promise((resolve,reject) => {
-    console.log('list_devices_locations: ' + value);
-    var access_token = Homey.ManagerSettings.get('access_token');
-    var locationurl = ('/WebAPI/emea/api/v1/location/' + value + '/status?includeTemperatureControlSystems=True');
-    var options = {
-      protocol: 'https:',
-      hostname: 'tccna.honeywell.com',
-      path: locationurl,
-      headers: {
-        'Authorization': 'bearer ' + access_token,
-        'Accept': 'application/json, application/xml, text/json, text/x-json, text/javascript, text/xml'
-      }
-    }
-    console.log(locationurl)
-    http.get(options).then(function (result) {
-      var data = JSON.parse(result.data)
-      console.log('--- PAIRING ---');
-      //console.log(data.gateways[0].temperatureControlSystems[0].zones);
-      var zones = data.gateways[0].temperatureControlSystems[0].zones;
-      zones.forEach((device) => {
-        var foundDevice = {
-          //name: device.name + ' ' + value,
-          name: device.name,
-          data: {
-            id: device.zoneId,
-            location: value
-          }
-        }
-        //console.log(foundDevice);
-        global_list_devices.push(foundDevice);
-        console.log(global_list_devices.length)
-      resolve(global_list_devices)
-    })
-  })
-})
 }
